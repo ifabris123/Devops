@@ -1,0 +1,46 @@
+# Use the official Alpine image as the base image
+FROM alpine:latest
+
+# Install Apache HTTP Server
+RUN apk --no-cache add httpd
+
+# Create a simple index.html for demonstration purposes
+RUN echo "Hello from Alpine Apache Server!" > /var/www/localhost/htdocs/index.html
+
+# Expose port 80 for the web server
+EXPOSE 80
+
+# Define the command to start Apache in the foreground
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+
+# Use the official Ubuntu image as the base image
+FROM ubuntu:latest
+
+# Set the maintainer label
+LABEL maintainer="your-email@example.com"
+
+# Update the package list and install Apache2
+RUN apt-get update \
+    && apt-get install -y apache2 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Expose port 80 for the web server
+EXPOSE 80
+
+# Define the command to start Apache in the foreground
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
+
+# Use the official Nginx image as the base
+FROM nginx:latest
+
+# Set the maintainer label (optional)
+LABEL maintainer="your-email@example.com"
+
+# Copy a custom HTML file to the default Nginx public directory
+COPY ./my-custom-page.html /usr/share/nginx/html/index.html
+
+# Expose port 80 for the web server
+EXPOSE 80
+
+# The CMD command to run Nginx is already set in the official image, so you don't need to specify it again.
