@@ -1,0 +1,73 @@
+MULTI
+
+# Node.js Dockerfile
+FROM node:14
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+EXPOSE 30080
+CMD ["node", "app.js"]
+
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: items
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: mypa55
+      MYSQL_ROOT_PASSWORD: r00tpa55
+    volumes:
+      - ./work/data:/var/lib/mysql/data
+    ports:
+      - "30306:3306"
+
+  todoapi:
+    build:
+      context: ./path_to_todonodejs_directory
+    environment:
+      MYSQL_DATABASE: items
+      MYSQL_USER: user1
+      MYSQL_PASSWORD: mypa55
+      MYSQL_HOST: mysql
+    ports:
+      - "30080:30080"
+    depends_on:
+      - mysql
+
+
+docker-compose build
+
+docker-compose up
+
+or podman 
+
+podman run -d \
+    --name mysql \
+    -e MYSQL_DATABASE=items \
+    -e MYSQL_USER=user1 \
+    -e MYSQL_PASSWORD=mypa55 \
+    -e MYSQL_ROOT_PASSWORD=r00tpa55 \
+    -v $PWD/work/data:/var/lib/mysql/data \
+    -p 30306:3306 \
+    mysql:8.0
+
+
+podman pull node:14
+
+podman run -d \
+    --name todoapi \
+    -v $(pwd)/myapp:/usr/src/app:Z \
+    -w /usr/src/app \
+    -e MYSQL_DATABASE=items \
+    -e MYSQL_USER=user1 \
+    -e MYSQL_PASSWORD=mypa55 \
+    -p 30080:3000 \
+    node:14 node myapp/app.js
+
